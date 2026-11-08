@@ -1,39 +1,46 @@
 "use client";
 
 import { useRef, useEffect } from "react";
+import { startFireworks } from "@/lib/fireworks";
+import { useInView } from "@/lib/useInView";
 
 interface FireworksProps {
   interactive?: boolean;
 }
 
+type FireworksHandle = ReturnType<typeof startFireworks>;
+
 export default function Fireworks({ interactive = true }: FireworksProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const stopRef = useRef<((() => void) & { boom?: (x: number, y: number) => void }) | null>(null);
+  const handleRef = useRef<FireworksHandle | null>(null);
+  const inView = useInView(canvasRef);
 
+  // Starts on first sight and only animates while on screen
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    let localStop: ((() => void) & { boom?: (x: number, y: number) => void }) | null = null;
+    if (!inView) {
+      handleRef.current?.pause();
+    } else if (handleRef.current) {
+      handleRef.current.resume();
+    } else {
+      handleRef.current = startFireworks(canvas, { rate: 1, burstAtStart: true });
+    }
+  }, [inView]);
 
-    // Dynamic import so the module runs only in the browser
-    import("@/lib/fireworks").then(({ startFireworks }) => {
-      localStop = startFireworks(canvas, { rate: 1, burstAtStart: true });
-      stopRef.current = localStop;
-    });
-
+  useEffect(() => {
     return () => {
-      localStop?.();
-      stopRef.current = null;
+      handleRef.current?.();
+      handleRef.current = null;
     };
   }, []);
 
-  // Global click / tap to burst fireworks in the background
+  // Tap on the background to set off a burst
   useEffect(() => {
     if (!interactive) return;
 
     const handlePointerDown = (e: PointerEvent) => {
-      // Only burst if clicking on background (not interactive buttons/inputs)
       const target = e.target as HTMLElement;
       if (
         target.tagName === "BUTTON" ||
@@ -47,9 +54,7 @@ export default function Fireworks({ interactive = true }: FireworksProps) {
         return;
       }
 
-      if (stopRef.current?.boom) {
-        stopRef.current.boom(e.clientX, e.clientY);
-      }
+      handleRef.current?.boom(e.clientX, e.clientY);
     };
 
     window.addEventListener("pointerdown", handlePointerDown, { passive: true });

@@ -1,135 +1,45 @@
 "use client";
 
-import { useRef, useMemo, useState, useEffect } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import * as THREE from "three";
-import { createJar, makeEnv, addDefaultLights } from "@/lib/iqooModels";
 import { JarItem } from "@/types/gift";
-
-function JarSceneSetup() {
-  const { gl, scene } = useThree();
-
-  useEffect(() => {
-    let envTex: THREE.Texture | null = null;
-    try {
-      envTex = makeEnv(gl);
-      scene.environment = envTex;
-      addDefaultLights(scene);
-    } catch (e) {
-      console.warn("Could not setup jar env:", e);
-    }
-    return () => {
-      if (envTex) envTex.dispose();
-    };
-  }, [gl, scene]);
-
-  return null;
-}
-
-interface JarModelProps {
-  item: JarItem;
-  isHovered: boolean;
-  isSelected: boolean;
-}
-
-function JarModel({ item, isHovered, isSelected }: JarModelProps) {
-  const outerRef = useRef<THREE.Group>(null);
-  const spinRef = useRef<THREE.Group>(null);
-  // Stagger initial rotation so adjacent jars start from different angles
-  const rotY = useRef((item.name.length * 0.73) % (Math.PI * 2));
-
-  const jarGroup = useMemo(() => {
-    return createJar(item);
-  }, [item]);
-
-  useEffect(() => {
-    const currentJar = jarGroup;
-    return () => {
-      if (currentJar) {
-        currentJar.traverse((child) => {
-          const mesh = child as THREE.Mesh;
-          if (mesh.isMesh) {
-            mesh.geometry?.dispose();
-            const mat = mesh.material;
-            if (Array.isArray(mat)) {
-              mat.forEach((m) => {
-                (m as THREE.MeshStandardMaterial).map?.dispose();
-                m.dispose();
-              });
-            } else if (mat) {
-              (mat as THREE.MeshStandardMaterial).map?.dispose();
-              mat.dispose();
-            }
-          }
-        });
-      }
-    };
-  }, [jarGroup]);
-
-  // Continuous smooth spin animation loop
-  useFrame((_, delta) => {
-    if (!spinRef.current) return;
-    const dt = Math.min(delta, 0.1);
-    // Faster spin when hovered, steady continuous majestic spin at all times
-    const speed = isHovered ? 2.4 : isSelected ? 1.2 : 0.85;
-    rotY.current += dt * speed;
-    spinRef.current.rotation.y = rotY.current;
-
-    // Smooth subtle floating lift when selected or hovered
-    if (outerRef.current) {
-      const targetY = isSelected ? 0.05 : isHovered ? 0.08 : 0;
-      outerRef.current.position.y += (targetY - outerRef.current.position.y) * 0.14;
-    }
-  });
-
-  return (
-    // Center jar vertically — jar is ~0.7 tall, position so whole jar + lid + label are visible
-    // Slight forward tilt (0.1 rad) to show the top label
-    <group ref={outerRef} position={[0, -0.25, 0]} rotation={[0.1, 0, 0]}>
-      {/* spinRef continuously spins the jar around its vertical cylinder axis */}
-      <group ref={spinRef}>
-        <primitive object={jarGroup} />
-      </group>
-    </group>
-  );
-}
 
 interface JarThumbnailProps {
   item: JarItem;
   isSelected: boolean;
   disabled: boolean;
+  showPlaceholder: boolean;
   onClick: (e: React.MouseEvent) => void;
-  slotNumber?: number;
+  onHoverChange: (id: string | null) => void;
 }
 
+/**
+ * One grid cell. The 3D jar itself is painted by JarStage over the [data-jar-cell] box.
+ * Don't add transforms or opacity to the button: they would shift the measured cell
+ * and trap the halo and badge in the wrong stacking order.
+ */
 export default function JarThumbnail({
   item,
   isSelected,
   disabled,
+  showPlaceholder,
   onClick,
+  onHoverChange,
 }: JarThumbnailProps) {
-  const [isHovered, setIsHovered] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const isLocked = disabled && !isSelected;
 
   return (
     <button
       type="button"
       onClick={onClick}
-      disabled={disabled && !isSelected}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onFocus={() => setIsHovered(true)}
-      onBlur={() => setIsHovered(false)}
+      disabled={isLocked}
+      onMouseEnter={() => onHoverChange(item.id)}
+      onMouseLeave={() => onHoverChange(null)}
+      onFocus={() => onHoverChange(item.id)}
+      onBlur={() => onHoverChange(null)}
       aria-label={`${item.name}${isSelected ? " (In your box, click to remove)" : ""}`}
-      className={`relative group flex flex-col items-center justify-end transition-all duration-300 w-full max-w-[72px] sm:max-w-[130px] flex-shrink-0 text-center select-none outline-none cursor-pointer pt-5 sm:pt-6 ${
-        disabled && !isSelected ? "opacity-35 cursor-not-allowed" : "hover:scale-[1.06]"
+      className={`relative group flex flex-col items-center w-full max-w-[130px] text-center select-none outline-none pt-4 sm:pt-6 ${
+        isLocked ? "cursor-not-allowed" : "cursor-pointer"
       }`}
     >
-      {/* "In your box" Golden Badge with downward pointer (Matching Reference Image) */}
       <div
         className={`absolute top-0 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center pointer-events-none transition-all duration-300 ${
           isSelected
@@ -140,13 +50,10 @@ export default function JarThumbnail({
         <span className="px-1.5 sm:px-2.5 py-0.5 rounded-full bg-[#f2b31e] text-[#1a1200] font-body text-[8px] sm:text-[10px] font-bold tracking-tight shadow-md whitespace-nowrap">
           In your box
         </span>
-        {/* Downward pointer triangle pointing right to jar top lid */}
         <span className="w-0 h-0 border-l-[3px] sm:border-l-[4px] border-l-transparent border-r-[3px] sm:border-r-[4px] border-r-transparent border-t-[4px] sm:border-t-[5px] border-t-[#f2b31e] -mt-[1px]" />
       </div>
 
-      {/* 3D Jar Canvas: Wider FOV and pulled-back camera to prevent cropping */}
-      <div className="relative w-16 h-20 sm:w-24 sm:h-28 md:w-28 md:h-32 lg:w-32 lg:h-36 flex items-center justify-center pointer-events-none overflow-visible">
-        {/* Gold radiant glow halo behind selected jar */}
+      <div data-jar-cell={item.id} className="relative w-full aspect-[4/5]">
         {isSelected && (
           <div
             className="absolute inset-0 rounded-full blur-xl pointer-events-none animate-pulse"
@@ -157,36 +64,25 @@ export default function JarThumbnail({
           />
         )}
 
-        {mounted && (
-          <Canvas
-            frameloop="always"
-            camera={{ position: [0, 1.2, 2.6], fov: 32 }}
-            gl={{ antialias: true, alpha: true, powerPreference: "low-power" }}
-            dpr={[1, 1.5]}
-            onCreated={({ camera }) => {
-              // Look at the center of the jar (slightly below origin)
-              camera.lookAt(0, 0.05, 0);
+        {/* Flat jar outline, part of the first HTML, shown until the 3D jars are drawn */}
+        <div
+          className={`absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-300 ${
+            showPlaceholder ? "opacity-100" : "opacity-0"
+          }`}
+          aria-hidden="true"
+        >
+          <div className="w-[62%] h-[14%] rounded-t-md rounded-b-sm bg-[#d9a92c]" />
+          <div
+            className="w-[56%] h-[46%] rounded-b-lg opacity-75"
+            style={{
+              backgroundColor: `#${item.color.toString(16).padStart(6, "0")}`,
             }}
-          >
-            {/* Required environment map for shiny gold and glass materials */}
-            <JarSceneSetup />
-
-            {/* Key overhead light to illuminate the top circular label & mandala */}
-            <directionalLight position={[0, 4, 1.5]} intensity={2.6} color="#fff6e0" />
-            {/* Front golden fill for candies inside transparent glass */}
-            <pointLight position={[0, 1, 2]} intensity={1.6} color="#ffeaa7" />
-            {/* Side rim lights to highlight the spinning gold rim */}
-            <pointLight position={[-1.8, 1, 1]} intensity={1.4} color="#e6bf5a" />
-            <pointLight position={[1.8, 1, -1]} intensity={1.0} color="#f2b31e" />
-
-            <JarModel item={item} isHovered={isHovered} isSelected={isSelected} />
-          </Canvas>
-        )}
+          />
+        </div>
       </div>
 
-      {/* Item Name (Clean font, responsive text, matching Reference Image) */}
       <span
-        className={`font-body text-[9px] sm:text-xs md:text-sm tracking-wide mt-1 sm:mt-1.5 leading-tight line-clamp-2 max-w-[70px] sm:max-w-none transition-colors ${
+        className={`font-body text-[10px] sm:text-xs md:text-sm tracking-wide mt-1 sm:mt-1.5 leading-tight min-h-[2.5em] line-clamp-2 transition-colors ${
           isSelected
             ? "text-gold font-medium drop-shadow-[0_0_8px_rgba(242,179,30,0.5)]"
             : disabled

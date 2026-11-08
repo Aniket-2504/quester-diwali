@@ -4,6 +4,7 @@ import { useRef, useEffect, useMemo, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { createQLogo, makeEnv, addDefaultLights } from "@/lib/iqooModels";
+import { useInView } from "@/lib/useInView";
 
 function SetupScene() {
   const { gl, scene } = useThree();
@@ -59,7 +60,7 @@ function QModel({ pointerRef, reducedMotion }: QModelProps) {
   // Smooth rotation, tilt, and entrance scale state
   const rotY = useRef(0);
   const currentTilt = useRef({ x: 0, y: 0 });
-  const scale = useRef(0.85);
+  const scale = useRef(0.96); // starts close to the static Q it replaces
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
@@ -104,6 +105,7 @@ export default function HeroQCanvas() {
   const [reducedMotion, setReducedMotion] = useState(false);
   const pointerRef = useRef({ x: 0, y: 0, active: false });
   const containerRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(containerRef, "120px");
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -139,9 +141,10 @@ export default function HeroQCanvas() {
     <div
       ref={containerRef}
       className="relative w-full h-full cursor-grab active:cursor-grabbing select-none"
-      style={{ touchAction: "none" }}
+      style={{ touchAction: "pan-y" }}
     >
       <Canvas
+        frameloop={inView ? "always" : "never"}
         camera={{ position: [0, 0, 5.2], fov: 42 }}
         gl={{
           antialias: true,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { saveGift } from "@/lib/db";
-import { ITEMS } from "@/lib/iqooModels";
+import { ITEMS } from "@/lib/jarItems";
 
 // Basic in-memory rate-limiter: max 20 creations per 5 minutes per IP
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();

@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowRight, Flame } from "lucide-react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -63,8 +64,8 @@ export default function GiftNotFound() {
       <Fireworks />
 
       <div className="relative z-10 max-w-md rounded-2xl bg-[#0c0c0c] border border-gold/30 p-8 shadow-[0_0_50px_rgba(0,0,0,0.9)] flex flex-col items-center">
-        <div className="w-16 h-16 rounded-full border border-gold/40 flex items-center justify-center text-3xl mb-4 text-gold shadow-[0_0_20px_rgba(230,191,90,0.2)]">
-          🪔
+        <div className="w-16 h-16 rounded-full border border-gold/40 flex items-center justify-center mb-4 text-gold shadow-[0_0_20px_rgba(230,191,90,0.2)]">
+          <Flame className="w-8 h-8" aria-hidden="true" />
         </div>
 
         <span className="text-[10px] uppercase tracking-[0.25em] text-gold/80 font-brand font-bold mb-2">
@@ -83,9 +84,10 @@ export default function GiftNotFound() {
 
         <Link
           href="/"
-          className="mt-6 px-8 py-3.5 rounded-full bg-gold text-black font-body text-xs uppercase tracking-[0.2em] font-semibold hover:bg-gold/90 transition-all shadow-lg"
+          className="mt-6 inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-gold text-black font-body text-xs uppercase tracking-[0.2em] font-semibold hover:bg-gold/90 transition-all shadow-lg"
         >
-          Craft a Diwali Gift Box →
+          Craft a Diwali Gift Box
+          <ArrowRight className="w-4 h-4" aria-hidden="true" />
         </Link>
       </div>
     </main>

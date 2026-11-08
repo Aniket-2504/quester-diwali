@@ -7,19 +7,41 @@ import JarShelf from "./JarShelf";
 import SendGiftModal from "./SendGiftModal";
 import FlyingJarArc, { FlyingJarData } from "./FlyingJarArc";
 import Fireworks from "./Fireworks";
+import { useInView } from "@/lib/useInView";
+import { scrollPageTo } from "@/lib/scroll";
 
-// Eagerly preload GiftBoxCanvas chunk in background
+// Start downloading the 3D code straight away, ahead of hydration
 if (typeof window !== "undefined") {
   import("./GiftBoxCanvas");
+  import("./JarStage");
+}
+
+const BOX_STAGE_HEIGHT = "h-[min(96vw,420px)] sm:h-[400px] md:h-[460px] lg:h-[500px]";
+
+// Gives the hero Q first go at the main thread, unless the visitor scrolls here sooner
+const LOAD_3D_AFTER_MS = 1200;
+
+const NAVBAR_CLEARANCE = 72;
+
+/** Brings the box on screen so a picked jar is seen landing, and leaves the page alone if it's already visible. */
+function revealBox(box: HTMLElement) {
+  const rect = box.getBoundingClientRect();
+  const visible =
+    Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, NAVBAR_CLEARANCE);
+  if (visible < rect.height * 0.6) scrollPageTo(box, -16);
+}
+
+function BoxPlaceholder() {
+  return (
+    <div className={`w-full ${BOX_STAGE_HEIGHT} flex items-center justify-center`}>
+      <div className="w-36 h-24 sm:w-48 sm:h-32 rounded-xl bg-gradient-to-br from-gold/20 to-royal/20 animate-pulse" />
+    </div>
+  );
 }
 
 const GiftBoxCanvas = dynamic(() => import("./GiftBoxCanvas"), {
   ssr: false,
-  loading: () => (
-    <div className="w-full h-[260px] sm:h-[320px] md:h-[420px] flex items-center justify-center">
-      <div className="w-28 h-20 sm:w-40 sm:h-28 rounded-xl bg-gradient-to-br from-gold/15 to-royal/10 animate-pulse" />
-    </div>
-  ),
+  loading: () => <BoxPlaceholder />,
 });
 
 export default function GiftBuilderSection() {
@@ -39,6 +61,15 @@ export default function GiftBuilderSection() {
   const boxContainerRef = useRef<HTMLDivElement>(null);
   const hasAutoOpened = useRef(false);
   const flightCounter = useRef(0);
+
+  const isNearViewport = useInView(sectionRef, "60% 0px");
+  const [timerElapsed, setTimerElapsed] = useState(false);
+  const load3D = isNearViewport || timerElapsed;
+
+  useEffect(() => {
+    const timer = setTimeout(() => setTimerElapsed(true), LOAD_3D_AFTER_MS);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Auto-open lid when section scrolls into view
   useEffect(() => {
@@ -82,14 +113,12 @@ export default function GiftBuilderSection() {
       // If not in the box, find first empty slot
       const firstEmptyIndex = selectedSlots.findIndex((s) => s === null);
       if (firstEmptyIndex !== -1) {
-        // Trigger fly-in arc animation
-        const targetBox = boxContainerRef.current?.getBoundingClientRect();
-        const targetX = targetBox
-          ? targetBox.left + targetBox.width / 2
-          : window.innerWidth / 2;
-        const targetY = targetBox
-          ? targetBox.top + targetBox.height * 0.55
-          : window.innerHeight * 0.35;
+        // Fly out of the jar's own cell, which also works for keyboard presses that have no pointer position
+        const jarCell = e.currentTarget
+          .querySelector("[data-jar-cell]")
+          ?.getBoundingClientRect();
+        const targetEl = boxContainerRef.current;
+        if (targetEl) revealBox(targetEl);
 
         flightCounter.current += 1;
         const flightId = `${item.id}-${Date.now()}-${flightCounter.current}-${Math.random().toString(36).slice(2, 6)}`;
@@ -99,10 +128,9 @@ export default function GiftBuilderSection() {
           {
             id: flightId,
             item,
-            startX: e.clientX || window.innerWidth / 2,
-            startY: e.clientY || window.innerHeight * 0.7,
-            targetX,
-            targetY,
+            startX: jarCell ? jarCell.left + jarCell.width / 2 : window.innerWidth / 2,
+            startY: jarCell ? jarCell.top + jarCell.height / 2 : window.innerHeight * 0.7,
+            targetEl,
           },
         ]);
 
@@ -191,12 +219,16 @@ export default function GiftBuilderSection() {
           ref={boxContainerRef}
           className="w-full relative flex items-center justify-center"
         >
-          <GiftBoxCanvas
-            selectedSlots={selectedSlots}
-            isOpen={isOpen}
-            onToggleOpen={() => setIsOpen((v) => !v)}
-            className="w-full h-[260px] sm:h-[320px] md:h-[420px] lg:h-[460px]"
-          />
+          {load3D ? (
+            <GiftBoxCanvas
+              selectedSlots={selectedSlots}
+              isOpen={isOpen}
+              onToggleOpen={() => setIsOpen((v) => !v)}
+              className={`w-full ${BOX_STAGE_HEIGHT}`}
+            />
+          ) : (
+            <BoxPlaceholder />
+          )}
         </div>
       </div>
 
@@ -204,6 +236,7 @@ export default function GiftBuilderSection() {
       <div className="relative z-10 w-full flex flex-col items-center justify-center mt-3 sm:mt-5">
         <JarShelf
           selectedSlots={selectedSlots}
+          load3D={load3D}
           onToggleJar={handleToggleJar}
           onRemoveSlot={handleRemoveSlot}
           onOpenSendModal={() => setIsModalOpen(true)}

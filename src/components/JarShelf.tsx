@@ -1,12 +1,17 @@
 "use client";
 
-import { useMemo } from "react";
-import { ITEMS } from "@/lib/iqooModels";
+import { useCallback, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import { Sparkles, X } from "lucide-react";
+import { ITEMS } from "@/lib/jarItems";
 import { JarItem, SlotSelection } from "@/types/gift";
 import JarThumbnail from "./JarThumbnail";
 
+const JarStage = dynamic(() => import("./JarStage"), { ssr: false });
+
 interface JarShelfProps {
   selectedSlots: SlotSelection;
+  load3D: boolean;
   onToggleJar: (item: JarItem, e: React.MouseEvent) => void;
   onRemoveSlot: (index: number) => void;
   onOpenSendModal: () => void;
@@ -14,15 +19,26 @@ interface JarShelfProps {
 
 export default function JarShelf({
   selectedSlots,
+  load3D,
   onToggleJar,
   onRemoveSlot,
   onOpenSendModal,
 }: JarShelfProps) {
-  // Count filled slots
-  const count = useMemo(() => {
-    return selectedSlots.filter(Boolean).length;
-  }, [selectedSlots]);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const hoveredRef = useRef<string | null>(null);
+  const [jarsReady, setJarsReady] = useState(false);
 
+  const setHovered = useCallback((id: string | null) => {
+    hoveredRef.current = id;
+  }, []);
+  const handleJarsReady = useCallback(() => setJarsReady(true), []);
+
+  const selectedIds = useMemo(
+    () => selectedSlots.flatMap((slot) => (slot ? [slot.id] : [])),
+    [selectedSlots]
+  );
+
+  const count = selectedIds.length;
   const isFull = count === 6;
 
   return (
@@ -50,9 +66,9 @@ export default function JarShelf({
                     type="button"
                     onClick={() => onRemoveSlot(idx)}
                     aria-label={`Remove ${item.name}`}
-                    className="text-gold/70 hover:text-gold hover:scale-125 transition-transform cursor-pointer text-sm leading-none"
+                    className="text-gold/70 hover:text-gold hover:scale-125 transition-transform cursor-pointer"
                   >
-                    ×
+                    <X className="w-3.5 h-3.5" aria-hidden="true" />
                   </button>
                 </>
               ) : null}
@@ -62,8 +78,9 @@ export default function JarShelf({
 
         {/* Right: Counter status & Send Gift Button */}
         <div className="flex items-center gap-3 sm:gap-4">
-          <span className="font-body text-xs sm:text-sm text-fg/60 tracking-wide whitespace-nowrap">
-            {isFull ? "✨ All 6 chosen" : `Pick ${6 - count} more`}
+          <span className="inline-flex items-center gap-1 font-body text-xs sm:text-sm text-fg/60 tracking-wide whitespace-nowrap">
+            {isFull && <Sparkles className="w-3.5 h-3.5 text-gold" aria-hidden="true" />}
+            {isFull ? "All 6 chosen" : `Pick ${6 - count} more`}
           </span>
 
           <button
@@ -81,39 +98,31 @@ export default function JarShelf({
         </div>
       </div>
 
-      {/* ── 10 Jars Grid: 2 Rows of 5 Jars (Mobile-optimized) ── */}
-      <div className="w-full max-w-4xl mx-auto flex flex-col items-center">
-        {/* Row 1: First 5 Jars */}
-        <div className="w-full grid grid-cols-5 gap-y-4 sm:gap-y-10 gap-x-1 sm:gap-x-6 md:gap-x-8 justify-items-center mb-4 sm:mb-10">
-          {ITEMS.slice(0, 5).map((item: JarItem) => {
-            const isSelected = selectedSlots.some((s) => s?.id === item.id);
-            return (
-              <JarThumbnail
-                key={item.id}
-                item={item}
-                isSelected={isSelected}
-                disabled={isFull}
-                onClick={(e) => onToggleJar(item, e)}
-              />
-            );
-          })}
+      {/* ── 10 Jars Grid: 2 Rows of 5 Jars, all drawn by one shared canvas ── */}
+      <div ref={gridRef} className="relative isolate w-full max-w-4xl mx-auto">
+        <div className="w-full grid grid-cols-5 gap-y-3 sm:gap-y-8 gap-x-1 sm:gap-x-6 md:gap-x-8 justify-items-center">
+          {ITEMS.map((item) => (
+            <JarThumbnail
+              key={item.id}
+              item={item}
+              isSelected={selectedIds.includes(item.id)}
+              disabled={isFull}
+              showPlaceholder={!jarsReady}
+              onClick={(e) => onToggleJar(item, e)}
+              onHoverChange={setHovered}
+            />
+          ))}
         </div>
 
-        {/* Row 2: Second 5 Jars */}
-        <div className="w-full grid grid-cols-5 gap-y-4 sm:gap-y-10 gap-x-1 sm:gap-x-6 md:gap-x-8 justify-items-center">
-          {ITEMS.slice(5, 10).map((item: JarItem) => {
-            const isSelected = selectedSlots.some((s) => s?.id === item.id);
-            return (
-              <JarThumbnail
-                key={item.id}
-                item={item}
-                isSelected={isSelected}
-                disabled={isFull}
-                onClick={(e) => onToggleJar(item, e)}
-              />
-            );
-          })}
-        </div>
+        {load3D && (
+          <JarStage
+            containerRef={gridRef}
+            selectedIds={selectedIds}
+            dimUnselected={isFull}
+            hoveredRef={hoveredRef}
+            onReady={handleJarsReady}
+          />
+        )}
       </div>
     </div>
   );

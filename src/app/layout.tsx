@@ -57,17 +57,8 @@ export default function RootLayout({
       lang="en"
       className={`${cormorant.variable} ${outfit.variable} ${montserrat.variable}`}
     >
-      <head>
-        {/* Instant audio preloader to eliminate network buffering delay */}
-        <link
-          rel="preload"
-          href="/musicforpeople-indian-music-491998.mp3"
-          as="audio"
-          type="audio/mpeg"
-        />
-      </head>
       <body className="min-h-screen flex flex-col antialiased bg-[#06050a] text-fg relative">
-        {/* Native Audio element in raw DOM for zero-delay instant playback */}
+        {/* In the raw HTML so playback doesn't have to wait for React */}
         <audio
           id="bg-music"
           src="/musicforpeople-indian-music-491998.mp3"
@@ -77,36 +68,36 @@ export default function RootLayout({
           playsInline
         />
 
-        {/* Immediate zero-delay audio activation script — music ALWAYS plays */}
+        {/*
+          Runs during HTML parsing. Browsers refuse sound until the visitor has interacted
+          with the page, so if the first play() is blocked, every event that counts as an
+          interaction retries it. The listeners stay on so music also resumes after an
+          interruption such as a phone call. Pressing the sound button sets __musicStopped
+          for this page load, so a refresh starts the song again.
+        */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
-                try {
-                  var a = document.getElementById('bg-music');
-                  if (!a) return;
-                  a.volume = 0.45;
-                  localStorage.removeItem('iqoo_music_muted');
-
-                  // Attempt immediate autoplay on HTML parse
+                var a = document.getElementById('bg-music');
+                if (!a) return;
+                a.volume = 0.45;
+                function play(e) {
+                  if (!a.paused || window.__musicStopped) return;
+                  // The sound button decides for itself, or its first tap would start and then stop the song
+                  var t = e && e.target;
+                  if (t && t.closest && t.closest('[data-music-toggle]')) return;
                   var p = a.play();
-                  if (p && p.catch) {
-                    p.catch(function() {
-                      // If browser requires gesture, play on the very first micro-gesture
-                      var start = function() {
-                        a.play().catch(function(){});
-                        ['pointerdown', 'pointermove', 'touchstart', 'click', 'scroll', 'keydown'].forEach(function(e) {
-                          window.removeEventListener(e, start);
-                          document.removeEventListener(e, start);
-                        });
-                      };
-                      ['pointerdown', 'pointermove', 'touchstart', 'click', 'scroll', 'keydown'].forEach(function(e) {
-                        window.addEventListener(e, start, { passive: true, once: true });
-                        document.addEventListener(e, start, { passive: true, once: true });
-                      });
-                    });
-                  }
-                } catch(e) {}
+                  if (p && p.catch) p.catch(function() {});
+                }
+                ['pointerdown', 'pointerup', 'mousedown', 'touchend', 'click', 'keydown'].forEach(function(e) {
+                  window.addEventListener(e, play, { capture: true, passive: true });
+                });
+                a.addEventListener('pause', function() { setTimeout(play, 80); });
+                document.addEventListener('visibilitychange', function() {
+                  if (!document.hidden) play();
+                });
+                play();
               })();
             `,
           }}

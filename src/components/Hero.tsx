@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { ChevronDown } from "lucide-react";
 import Fireworks from "./Fireworks";
 
 // Eagerly preload HeroQCanvas chunk to eliminate delay
@@ -10,10 +11,20 @@ if (typeof window !== "undefined") {
 
 const HeroQCanvas = dynamic(() => import("./HeroQCanvas"), {
   ssr: false,
+  // Same outline and framing as the 3D model, so the Q is visible in the very first paint
   loading: () => (
-    <div className="w-full h-full flex items-center justify-center">
-      <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-gold/20 to-gold/5 animate-pulse" />
-    </div>
+    <svg viewBox="-2 -2 4 4" className="w-full h-full" aria-hidden="true">
+      <defs>
+        <linearGradient id="hero-q-gold" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#f2cf63" />
+          <stop offset="1" stopColor="#dca928" />
+        </linearGradient>
+      </defs>
+      <g fill="url(#hero-q-gold)">
+        <path d="M1.55 0A1.55 1.55 0 1 0 0 1.55L0 1.04A1.04 1.04 0 1 1 1.04 0Z" />
+        <rect x="-.88" y="-.25" width="1.76" height=".5" transform="translate(.775 .76) rotate(45)" />
+      </g>
+    </svg>
   ),
 });
 
@@ -30,7 +41,7 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="relative w-full min-h-screen min-h-[720px] flex flex-col items-center justify-center overflow-hidden bg-transparent pt-20 pb-16"
+      className="relative w-full min-h-[max(100svh,600px)] flex flex-col items-center justify-center overflow-hidden bg-transparent pt-20 pb-16"
     >
       {/* Fireworks background */}
       <Fireworks />
@@ -50,7 +61,7 @@ export default function Hero() {
         {/* 3D Q logo — smaller on mobile for faster render */}
         <div
           id="hero-q-mount"
-          className="w-[220px] h-[220px] sm:w-[300px] sm:h-[300px] md:w-[400px] md:h-[400px] lg:w-[460px] lg:h-[460px] mb-2 pointer-events-auto"
+          className="w-[min(62vw,34svh)] h-[min(62vw,34svh)] sm:w-[300px] sm:h-[300px] md:w-[400px] md:h-[400px] lg:w-[460px] lg:h-[460px] mb-2 pointer-events-auto"
           aria-label="3D Q festive logo"
         >
           <HeroQCanvas />
@@ -89,32 +100,10 @@ export default function Hero() {
         <span className="text-[10px] uppercase tracking-[0.3em] text-gold/60 group-hover:text-gold transition-colors font-body">
           Explore Gift Box
         </span>
-        <svg
-          width="16"
-          height="24"
-          viewBox="0 0 16 24"
-          fill="none"
-          className="text-gold/40 group-hover:text-gold/80 transition-colors"
+        <ChevronDown
+          className="w-5 h-5 text-gold/60 group-hover:text-gold transition-colors animate-bounce"
           aria-hidden="true"
-        >
-          <rect
-            x="1"
-            y="1"
-            width="14"
-            height="22"
-            rx="7"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          />
-          <circle cx="8" cy="8" r="2" fill="currentColor">
-            <animate
-              attributeName="cy"
-              values="8;14;8"
-              dur="1.8s"
-              repeatCount="indefinite"
-            />
-          </circle>
-        </svg>
+        />
       </a>
 
       {/* Bottom subtle gradient vignette */}

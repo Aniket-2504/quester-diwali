@@ -28,7 +28,18 @@
 
 html {
   background: #06050a;
-  scroll-behavior: smooth;
+}
+
+/* ── Lenis (owns scrolling, so html must not set scroll-behavior: smooth) ── */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+[data-lenis-prevent] {
+  overscroll-behavior: contain;
 }
 
 body {
@@ -118,20 +129,4 @@ textarea:focus-visible {
   outline: 2px solid #E6BF5A;
   outline-offset: 3px;
 }
-
-/* ── Music equalizer keyframes (GPU Hardware-Accelerated) ─── */
-@keyframes musicBar {
-  0% {
-    transform: scaleY(0.25);
-  }
-  100% {
-    transform: scaleY(1);
-  }
-}
-
-.music-bar {
-  transform-origin: bottom;
-  will-change: transform;
-}
-
 

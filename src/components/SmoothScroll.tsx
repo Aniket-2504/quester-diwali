@@ -13,15 +13,22 @@ export default function SmoothScroll() {
     if (prefersReducedMotion) return;
 
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: 0.8,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: "vertical",
       gestureOrientation: "vertical",
       smoothWheel: true,
-      wheelMultiplier: 0.9,
-      touchMultiplier: 1.5,
       autoResize: true,
+      anchors: { offset: -80 }, // keeps "#section" links clear of the fixed navbar
     });
+
+    // Lenis animates "#section" links itself but leaves the browser's instant jump in place
+    const stopNativeAnchorJump = (e: MouseEvent) => {
+      if ((e.target as Element).closest?.('a[href^="#"]:not([href="#"])')) {
+        e.preventDefault();
+      }
+    };
+    document.addEventListener("click", stopNativeAnchorJump, true);
 
     // Expose lenis instance globally for dynamic resize triggers
     (window as unknown as { lenis?: Lenis }).lenis = lenis;
@@ -41,6 +48,7 @@ export default function SmoothScroll() {
 
     return () => {
       cancelAnimationFrame(rafId);
+      document.removeEventListener("click", stopNativeAnchorJump, true);
       resizeObserver.disconnect();
       delete (window as unknown as { lenis?: Lenis }).lenis;
       lenis.destroy();

@@ -1,9 +1,10 @@
 "use client";
 
+import { ArrowUp, Flame, Sparkles } from "lucide-react";
+import { scrollPageTo } from "@/lib/scroll";
+
 export default function Footer() {
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  const scrollToTop = () => scrollPageTo(0);
 
   return (
     <footer className="w-full bg-transparent text-fg border-t border-gold/20 py-12 sm:py-16 px-4 sm:px-8 relative z-20">
@@ -22,7 +23,9 @@ export default function Footer() {
 
         {/* Festive Note (Made with love, Happy Diwali everyone!) */}
         <p className="mt-3 text-xs sm:text-sm font-body text-fg/75 max-w-md tracking-wide leading-relaxed">
-          Made with love, celebrating festive moments and high-performance spirits. Happy Diwali everyone! 🪔✨
+          Made with love, celebrating festive moments and high-performance spirits. Happy Diwali everyone!{" "}
+          <Flame className="inline w-4 h-4 text-gold align-text-bottom" aria-hidden="true" />{" "}
+          <Sparkles className="inline w-4 h-4 text-gold align-text-bottom" aria-hidden="true" />
         </p>
 
         {/* Navigation Quick Links */}
@@ -48,9 +51,10 @@ export default function Footer() {
           <button
             type="button"
             onClick={scrollToTop}
-            className="font-body text-xs sm:text-sm text-fg/50 hover:text-fg transition-colors tracking-wide cursor-pointer"
+            className="inline-flex items-center gap-1 font-body text-xs sm:text-sm text-fg/50 hover:text-fg transition-colors tracking-wide cursor-pointer"
           >
-            Back to top ↑
+            Back to top
+            <ArrowUp className="w-3.5 h-3.5" aria-hidden="true" />
           </button>
         </div>
       </div>

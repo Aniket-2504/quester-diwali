@@ -24,6 +24,8 @@ export function startFireworks(canvas, { rate = 1, burstAtStart = true } = {}) {
 
   function resize() {
     const dpr = Math.min(devicePixelRatio || 1, isMobile ? 1 : 2);
+    // Setting canvas.width wipes it, so ignore resizes that don't change this canvas (mobile URL bar)
+    if (canvas.clientWidth === W && canvas.clientHeight === H) return;
     W = canvas.clientWidth; H = canvas.clientHeight;
     canvas.width = W * dpr; canvas.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
@@ -65,9 +67,16 @@ export function startFireworks(canvas, { rate = 1, burstAtStart = true } = {}) {
     raf = requestAnimationFrame(frame);
   }
   raf = requestAnimationFrame(frame);
-  if (burstAtStart) for (let i = 0; i < (isMobile ? 2 : 3); i++) setTimeout(() => launch(), i * 250);
+  if (burstAtStart && !reduce) {
+    // Explode in the sky right away instead of waiting about a second for shells to climb
+    boom(W * 0.3, H * 0.25, COLORS[0], true);
+    boom(W * 0.7, H * 0.32, COLORS[2], true);
+    for (let i = 0; i < (isMobile ? 2 : 3); i++) setTimeout(() => launch(), i * 250);
+  }
 
-  const stop = () => { cancelAnimationFrame(raf); removeEventListener('resize', resize); };
+  const stop = () => { cancelAnimationFrame(raf); raf = 0; removeEventListener('resize', resize); };
   stop.boom = (x, y) => boom(x, y, COLORS[(Math.random() * 3) | 0], Math.random() < 0.4);
+  stop.pause = () => { cancelAnimationFrame(raf); raf = 0; };
+  stop.resume = () => { if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } };
   return stop;
 }

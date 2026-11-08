@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Image from "next/image";
+import { Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
   { label: "The box", href: "#gift-box" },
@@ -85,26 +85,16 @@ export default function Navbar() {
 
           {/* Mobile hamburger button */}
           <button
-            className="sm:hidden flex flex-col justify-center items-center w-8 h-8 gap-1 ml-1 text-gold"
+            className="sm:hidden flex justify-center items-center w-9 h-9 ml-1 text-gold"
             onClick={() => setMenuOpen((v) => !v)}
             aria-expanded={menuOpen}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
           >
-            <span
-              className={`block h-0.5 w-4 bg-gold transition-all duration-300 origin-center ${
-                menuOpen ? "rotate-45 translate-y-[5px]" : ""
-              }`}
-            />
-            <span
-              className={`block h-0.5 w-4 bg-gold transition-all duration-300 ${
-                menuOpen ? "opacity-0" : ""
-              }`}
-            />
-            <span
-              className={`block h-0.5 w-4 bg-gold transition-all duration-300 origin-center ${
-                menuOpen ? "-rotate-45 -translate-y-[5px]" : ""
-              }`}
-            />
+            {menuOpen ? (
+              <X className="w-5 h-5" aria-hidden="true" />
+            ) : (
+              <Menu className="w-5 h-5" aria-hidden="true" />
+            )}
           </button>
         </div>
       </nav>

@@ -1,8 +1,12 @@
 "use client";
 
 import { useState, useEffect, useId, useCallback } from "react";
+import dynamic from "next/dynamic";
+import { ArrowLeft, ArrowRight, Check, Flame, Gift, Loader2, X } from "lucide-react";
+import { getLenis } from "@/lib/scroll";
 import { JarItem, SlotSelection } from "@/types/gift";
-import GiftBoxCanvas from "./GiftBoxCanvas";
+
+const GiftBoxCanvas = dynamic(() => import("./GiftBoxCanvas"), { ssr: false });
 
 interface SendGiftModalProps {
   isOpen: boolean;
@@ -55,11 +59,13 @@ export default function SendGiftModal({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      getLenis()?.stop();
     } else {
       document.body.style.overflow = "";
     }
     return () => {
       document.body.style.overflow = "";
+      getLenis()?.start();
     };
   }, [isOpen]);
 
@@ -171,6 +177,7 @@ export default function SendGiftModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
+      data-lenis-prevent
     >
       {/* Modal Container: Midnight Deep Navy with subtle gold hairline (Matching Reference Image 3) */}
       <div className="relative w-full max-w-lg my-6 rounded-2xl bg-[#0D1126] border border-[#263158] shadow-[0_0_80px_rgba(0,0,0,0.95)] p-5 sm:p-7 flex flex-col">
@@ -179,9 +186,9 @@ export default function SendGiftModal({
           type="button"
           onClick={onClose}
           aria-label="Close modal"
-          className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-fg/70 hover:text-fg hover:bg-white/10 transition-colors cursor-pointer text-sm"
+          className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-fg/70 hover:text-fg hover:bg-white/10 transition-colors cursor-pointer"
         >
-          ✕
+          <X className="w-4 h-4" aria-hidden="true" />
         </button>
 
         {/* ── STEP 1: SENDER DETAILS ───────────────────────────────────── */}
@@ -298,9 +305,10 @@ export default function SendGiftModal({
 
             <button
               type="submit"
-              className="mt-6 w-full py-3.5 rounded-full bg-gradient-to-r from-[#F5C042] via-[#E8B530] to-[#DC9D1B] text-[#151515] font-body text-sm uppercase tracking-wider font-semibold hover:opacity-95 transition-all cursor-pointer shadow-lg"
+              className="mt-6 w-full flex items-center justify-center gap-2 py-3.5 rounded-full bg-gradient-to-r from-[#F5C042] via-[#E8B530] to-[#DC9D1B] text-[#151515] font-body text-sm uppercase tracking-wider font-semibold hover:opacity-95 transition-all cursor-pointer shadow-lg"
             >
-              Preview Gift Box →
+              Preview Gift Box
+              <ArrowRight className="w-4 h-4" aria-hidden="true" />
             </button>
           </form>
         )}
@@ -331,9 +339,10 @@ export default function SendGiftModal({
               <button
                 type="button"
                 onClick={() => setBoxPreviewOpen((v) => !v)}
-                className="absolute bottom-1 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-[#070A18]/90 border border-gold/40 text-[10px] sm:text-[11px] font-body text-gold uppercase tracking-widest cursor-pointer hover:border-gold transition-colors shadow-md"
+                className="absolute bottom-1 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-[#070A18]/90 border border-gold/40 inline-flex items-center gap-1.5 whitespace-nowrap text-[10px] sm:text-[11px] font-body text-gold uppercase tracking-widest cursor-pointer hover:border-gold transition-colors shadow-md"
               >
-                {boxPreviewOpen ? "Tap to Close" : "🎁 Tap to Open Box"}
+                {!boxPreviewOpen && <Gift className="w-3.5 h-3.5" aria-hidden="true" />}
+                {boxPreviewOpen ? "Tap to Close" : "Tap to Open Box"}
               </button>
             </div>
 
@@ -357,9 +366,10 @@ export default function SendGiftModal({
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="py-3 px-4 rounded-full border border-[#263158] text-fg/70 font-body text-xs uppercase tracking-widest hover:bg-white/5 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 py-3 px-4 rounded-full border border-[#263158] text-fg/70 font-body text-xs uppercase tracking-widest hover:bg-white/5 transition-colors cursor-pointer"
               >
-                ← Back
+                <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+                Back
               </button>
 
               {/* Solid Golden Pill Button (Matching Image 3: "Create gift link") */}
@@ -371,7 +381,7 @@ export default function SendGiftModal({
               >
                 {isSubmitting ? (
                   <>
-                    <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
                     <span>Creating link...</span>
                   </>
                 ) : (
@@ -385,8 +395,8 @@ export default function SendGiftModal({
         {/* ── STEP 3: LINK CREATED & SHARE ─────────────────────────────── */}
         {step === 3 && createdId && (
           <div className="flex flex-col items-center text-center">
-            <div className="w-14 h-14 rounded-full border-2 border-gold flex items-center justify-center text-2xl text-gold mb-3 shadow-[0_0_25px_rgba(230,191,90,0.4)]">
-              🪔
+            <div className="w-14 h-14 rounded-full border-2 border-gold flex items-center justify-center text-gold mb-3 shadow-[0_0_25px_rgba(230,191,90,0.4)]">
+              <Flame className="w-7 h-7" aria-hidden="true" />
             </div>
 
             <h3 className="font-heading text-2xl sm:text-3xl font-semibold tracking-wide text-gold">
@@ -405,9 +415,10 @@ export default function SendGiftModal({
               <button
                 type="button"
                 onClick={handleCopyLink}
-                className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#F5C042] to-[#E8B530] text-[#151515] text-xs font-body font-semibold uppercase tracking-wider hover:opacity-95 transition-all flex-shrink-0 cursor-pointer"
+                className="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-gradient-to-r from-[#F5C042] to-[#E8B530] text-[#151515] text-xs font-body font-semibold uppercase tracking-wider hover:opacity-95 transition-all flex-shrink-0 cursor-pointer"
               >
-                {copied ? "✓ Copied!" : "Copy"}
+                {copied && <Check className="w-3.5 h-3.5" aria-hidden="true" />}
+                {copied ? "Copied!" : "Copy"}
               </button>
             </div>
 
@@ -427,7 +438,8 @@ export default function SendGiftModal({
                 rel="noopener noreferrer"
                 className="flex-1 py-3.5 rounded-full border border-gold/50 text-gold font-body text-xs uppercase tracking-widest font-semibold hover:bg-gold hover:text-black transition-all flex items-center justify-center gap-2 text-center"
               >
-                <span>View Gift Page →</span>
+                <span>View Gift Page</span>
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
               </a>
             </div>
 

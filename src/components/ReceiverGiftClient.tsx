@@ -4,10 +4,13 @@ import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { GiftData, JarItem, SlotSelection } from "@/types/gift";
-import { ITEMS } from "@/lib/iqooModels";
+import dynamic from "next/dynamic";
+import { ArrowRight, Flame, Gift, Sparkles } from "lucide-react";
+import { ITEMS } from "@/lib/jarItems";
 import Fireworks from "./Fireworks";
-import GiftBoxCanvas from "./GiftBoxCanvas";
 import Footer from "./Footer";
+
+const GiftBoxCanvas = dynamic(() => import("./GiftBoxCanvas"), { ssr: false });
 
 interface ReceiverGiftClientProps {
   gift: GiftData;
@@ -72,11 +75,11 @@ export default function ReceiverGiftClient({ gift }: ReceiverGiftClientProps) {
           {/* Top Announcement Popup (Deep Midnight Navy with Gold Hairline) */}
           <div className="w-full rounded-2xl bg-[#0D1126] border border-[#263158] p-5 sm:p-7 shadow-[0_0_60px_rgba(0,0,0,0.95)] text-center flex flex-col items-center mb-4">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-gold text-base">🪔</span>
+              <Flame className="w-4 h-4 text-gold" aria-hidden="true" />
               <span className="text-[10px] uppercase tracking-[0.25em] text-[#E8B530] font-body">
                 Special Delivery
               </span>
-              <span className="text-gold text-base">🪔</span>
+              <Flame className="w-4 h-4 text-gold" aria-hidden="true" />
             </div>
 
             <h1 className="font-heading text-2xl sm:text-4xl font-semibold tracking-wide text-gold leading-tight">
@@ -89,9 +92,10 @@ export default function ReceiverGiftClient({ gift }: ReceiverGiftClientProps) {
               </p>
             )}
 
-            <p className="mt-2 text-xs sm:text-sm font-body text-fg/75 max-w-md">
+            <p className="mt-2 inline-flex items-center gap-1.5 text-xs sm:text-sm font-body text-fg/75 max-w-md">
+              {isOpen && <Sparkles className="w-4 h-4 text-gold flex-shrink-0" aria-hidden="true" />}
               {isOpen
-                ? "✨ Your Diwali hamper is unlocked! Jars have dropped into the box."
+                ? "Your Diwali hamper is unlocked! Jars have dropped into the box."
                 : "Tap the closed box below to open it and watch your 6 festive treats drop in!"}
             </p>
           </div>
@@ -108,7 +112,8 @@ export default function ReceiverGiftClient({ gift }: ReceiverGiftClientProps) {
                   : "bg-gradient-to-r from-[#F5C042] via-[#E8B530] to-[#DC9D1B] text-[#151515] border-2 border-gold animate-gold-pulse hover:scale-105"
               }`}
             >
-              <span>{isOpen ? "Tap Box to Close Lid" : "🎁 Tap Box to Open & Drop Jars"}</span>
+              {!isOpen && <Gift className="w-4 h-4" aria-hidden="true" />}
+              <span>{isOpen ? "Tap Box to Close Lid" : "Tap Box to Open & Drop Jars"}</span>
             </button>
 
             {/* 3D Box Canvas: Completely borderless, seamless on pure black */}
@@ -118,7 +123,7 @@ export default function ReceiverGiftClient({ gift }: ReceiverGiftClientProps) {
                 isOpen={isOpen}
                 onToggleOpen={() => setIsOpen((v) => !v)}
                 greeting={greeting}
-                className="w-full h-[280px] sm:h-[360px] md:h-[440px] lg:h-[480px]"
+                className="w-full h-[min(96vw,420px)] sm:h-[420px] md:h-[460px] lg:h-[500px]"
               />
             </div>
             <span className="text-[11px] font-body text-muted mt-1 tracking-wide">
@@ -189,9 +194,10 @@ export default function ReceiverGiftClient({ gift }: ReceiverGiftClientProps) {
               <div className="w-full text-center mt-4 mb-8 flex flex-col items-center">
                 <Link
                   href="/"
-                  className="px-8 py-3.5 rounded-full bg-gradient-to-r from-[#F5C042] via-[#E8B530] to-[#DC9D1B] text-[#151515] font-body text-xs uppercase tracking-[0.2em] font-semibold hover:opacity-95 transition-all shadow-[0_0_25px_rgba(230,191,90,0.4)]"
+                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-gradient-to-r from-[#F5C042] via-[#E8B530] to-[#DC9D1B] text-[#151515] font-body text-xs uppercase tracking-[0.2em] font-semibold hover:opacity-95 transition-all shadow-[0_0_25px_rgba(230,191,90,0.4)]"
                 >
-                  Craft Your Own Diwali Gift →
+                  Craft Your Own Diwali Gift
+                  <ArrowRight className="w-4 h-4" aria-hidden="true" />
                 </Link>
               </div>
             </div>
