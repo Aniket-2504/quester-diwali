@@ -1,0 +1,137 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-gold:    #E6BF5A;
+  --color-iqoo:    #F2B31E;
+  --color-royal:   #1630A8;
+  --color-royal-d: #0D1F6B;
+  --color-surface: #0A0A0A;
+  --color-muted:   #8A8272;
+  --color-fg:      #F5F0E8;
+  --color-bg:      #000000;
+
+  --font-heading: var(--font-cormorant);
+  --font-body:    var(--font-outfit);
+  --font-brand:   var(--font-montserrat);
+}
+
+.font-brand {
+  font-family: var(--font-brand), "Montserrat", system-ui, sans-serif;
+}
+
+/* ── Base resets ──────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: #06050a;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #06050a;
+  color: #F5F0E8;
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ── Smooth Ambient Atmospheric Background (Reference Match) ── */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(65% 55% at 50% 0%, rgba(22, 48, 168, 0.65) 0%, rgba(16, 36, 128, 0.4) 32%, rgba(10, 22, 85, 0.18) 55%, transparent 75%),
+    radial-gradient(55% 45% at 85% 100%, rgba(242, 179, 30, 0.14) 0%, transparent 70%),
+    radial-gradient(45% 45% at 8% 70%, rgba(180, 30, 60, 0.15) 0%, transparent 70%);
+}
+
+main,
+footer,
+header {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Reduced motion ──────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Selection ───────────────────────────────────────────── */
+::selection {
+  background: #E6BF5A;
+  color: #000;
+}
+
+/* ── Scrollbar (minimal) ─────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #E6BF5A;
+  border-radius: 3px;
+}
+
+/* ── Canvas resets ────────────────────────────────────────── */
+canvas {
+  display: block;
+}
+
+/* ── Gold hairline utility ───────────────────────────────── */
+.gold-hairline {
+  border-bottom: 1px solid rgba(230, 191, 90, 0.25);
+}
+
+/* ── Gold pulse keyframes ────────────────────────────────── */
+@keyframes gold-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(230, 191, 90, 0.4); }
+  50%      { box-shadow: 0 0 20px 4px rgba(230, 191, 90, 0.15); }
+}
+.animate-gold-pulse {
+  animation: gold-pulse 2s ease-in-out infinite;
+}
+
+/* ── Keyboard focus accessibility ────────────────────────── */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #E6BF5A;
+  outline-offset: 3px;
+}
+
+/* ── Music equalizer keyframes (GPU Hardware-Accelerated) ─── */
+@keyframes musicBar {
+  0% {
+    transform: scaleY(0.25);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+.music-bar {
+  transform-origin: bottom;
+  will-change: transform;
+}
+
+

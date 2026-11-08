@@ -1,0 +1,92 @@
+{
+  "bA8KBKN6": {
+    "id": "bA8KBKN6",
+    "senderName": "Rahul",
+    "role": "Diwali Sender",
+    "note": "Wishing you pure joy!",
+    "jarIds": [
+      "cashew",
+      "kaju",
+      "ladoo",
+      "cran",
+      "kiwi",
+      "mocha"
+    ],
+    "createdAt": "2026-11-08T09:47:20.415Z"
+  },
+  "3vbX67jW": {
+    "id": "3vbX67jW",
+    "senderName": "test",
+    "role": "best",
+    "note": "Wishing you and your family a radiant Diwali filled with light, laughter, and prosperity!",
+    "jarIds": [
+      "kaju",
+      "cran",
+      "kiwi",
+      "mocha",
+      "chikki",
+      "ladoo"
+    ],
+    "createdAt": "2026-11-08T09:54:28.874Z"
+  },
+  "ur4JfSP6": {
+    "id": "ur4JfSP6",
+    "senderName": "Aniket",
+    "role": "clan member",
+    "note": "Wishing you and your family a radiant Diwali filled with light, laughter, and prosperity!",
+    "jarIds": [
+      "cran",
+      "kiwi",
+      "cashew",
+      "soan",
+      "pan",
+      "mix"
+    ],
+    "createdAt": "2026-11-08T10:23:52.312Z"
+  },
+  "yPjBK6sN": {
+    "id": "yPjBK6sN",
+    "senderName": "Aniket",
+    "role": "clan member",
+    "note": "Wishing you and your family a radiant Diwali filled with light, laughter, and prosperity!",
+    "jarIds": [
+      "kaju",
+      "cashew",
+      "chikki",
+      "soan",
+      "pan",
+      "mix"
+    ],
+    "createdAt": "2026-11-08T10:41:14.248Z"
+  },
+  "7T6jQRCh": {
+    "id": "7T6jQRCh",
+    "senderName": "Aniket",
+    "role": "Pune Clan member",
+    "note": "Wishing you and your family a radiant Diwali filled with light, laughter, and prosperity!",
+    "jarIds": [
+      "kaju",
+      "ladoo",
+      "cran",
+      "kiwi",
+      "chikki",
+      "soan"
+    ],
+    "createdAt": "2026-11-08T11:38:18.912Z"
+  },
+  "TmV9Wc85": {
+    "id": "TmV9Wc85",
+    "senderName": "Aniket",
+    "role": "Pune clan member",
+    "note": "Wishing you and your family a radiant Diwali filled with light, laughter, and prosperity!",
+    "jarIds": [
+      "cran",
+      "kiwi",
+      "ladoo",
+      "kaju",
+      "cashew",
+      "chikki"
+    ],
+    "createdAt": "2026-11-08T13:48:41.416Z"
+  }
+}
