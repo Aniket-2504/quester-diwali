@@ -1,0 +1,110 @@
+[
+  {
+    "src": "/gallery/photo-01.webp",
+    "width": 1200,
+    "height": 800,
+    "color": "rgb(8,8,8)"
+  },
+  {
+    "src": "/gallery/photo-02.webp",
+    "width": 1200,
+    "height": 800,
+    "color": "rgb(8,8,8)"
+  },
+  {
+    "src": "/gallery/photo-03.webp",
+    "width": 1200,
+    "height": 800,
+    "color": "rgb(8,8,8)"
+  },
+  {
+    "src": "/gallery/photo-04.webp",
+    "width": 1200,
+    "height": 800,
+    "color": "rgb(8,8,8)"
+  },
+  {
+    "src": "/gallery/photo-05.webp",
+    "width": 900,
+    "height": 1200,
+    "color": "rgb(8,8,8)"
+  },
+  {
+    "src": "/gallery/photo-06.webp",
+    "width": 904,
+    "height": 1200,
+    "color": "rgb(8,8,8)"
+  },
+  {
+    "src": "/gallery/photo-07.webp",
+    "width": 1200,
+    "height": 800,
+    "color": "rgb(8,8,24)"
+  },
+  {
+    "src": "/gallery/photo-08.webp",
+    "width": 1200,
+    "height": 800,
+    "color": "rgb(8,8,8)"
+  },
+  {
+    "src": "/gallery/photo-09.webp",
+    "width": 675,
+    "height": 1200,
+    "color": "rgb(8,8,8)"
+  },
+  {
+    "src": "/gallery/photo-10.webp",
+    "width": 1200,
+    "height": 800,
+    "color": "rgb(8,8,24)"
+  },
+  {
+    "src": "/gallery/photo-11.webp",
+    "width": 900,
+    "height": 1200,
+    "color": "rgb(8,8,8)"
+  },
+  {
+    "src": "/gallery/photo-12.webp",
+    "width": 900,
+    "height": 1200,
+    "color": "rgb(8,8,24)"
+  },
+  {
+    "src": "/gallery/photo-13.webp",
+    "width": 900,
+    "height": 1200,
+    "color": "rgb(8,8,8)"
+  },
+  {
+    "src": "/gallery/photo-14.webp",
+    "width": 792,
+    "height": 1200,
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "src": "/gallery/photo-15.webp",
+    "width": 792,
+    "height": 1200,
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "src": "/gallery/photo-16.webp",
+    "width": 792,
+    "height": 1200,
+    "color": "rgb(248,248,248)"
+  },
+  {
+    "src": "/gallery/photo-17.webp",
+    "width": 1200,
+    "height": 900,
+    "color": "rgb(8,8,8)"
+  },
+  {
+    "src": "/gallery/photo-18.webp",
+    "width": 1200,
+    "height": 800,
+    "color": "rgb(8,8,8)"
+  }
+]

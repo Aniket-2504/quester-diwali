@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# original gallery photos (15 MB); the site serves the resized copies in public/gallery
+/public/diwali/
