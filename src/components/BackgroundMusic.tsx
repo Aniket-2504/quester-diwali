@@ -1,113 +1,98 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 
 export default function BackgroundMusic() {
-  // Initialize to true immediately on client so the equalizer animates with zero delay
-  const [isPlaying, setIsPlaying] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return localStorage.getItem("iqoo_music_muted") !== "true";
-  });
+  // Always show as playing — music is ALWAYS on
+  const retryRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Aggressively ensure music is always playing
+  const ensurePlaying = useCallback(() => {
+    const audio = document.getElementById("bg-music") as HTMLAudioElement | null;
+    if (!audio) return;
+
+    // Always clear any muted state
+    localStorage.removeItem("iqoo_music_muted");
+
+    if (audio.paused) {
+      audio.play().catch(() => {});
+    }
+  }, []);
 
   useEffect(() => {
+    ensurePlaying();
+
+    // Keep checking every 500ms to ensure music is always playing
+    retryRef.current = setInterval(ensurePlaying, 500);
+
+    // Also listen for any pause event and immediately resume
     const audio = document.getElementById("bg-music") as HTMLAudioElement | null;
-    if (!audio) return;
+    const onPause = () => {
+      // Immediately resume if paused for any reason
+      setTimeout(() => {
+        const a = document.getElementById("bg-music") as HTMLAudioElement | null;
+        if (a && a.paused) {
+          a.play().catch(() => {});
+        }
+      }, 50);
+    };
 
-    // Immediately check if already playing or should play
-    const isMuted = localStorage.getItem("iqoo_music_muted") === "true";
-    if (isMuted) {
-      audio.pause();
-      setIsPlaying(false);
-    } else {
-      setIsPlaying(true);
-      if (audio.paused) {
-        audio.play().catch(() => {});
+    // Listen for visibility changes to resume on tab switch back
+    const onVisibilityChange = () => {
+      if (!document.hidden) {
+        ensurePlaying();
       }
-    }
+    };
 
-    const onPlay = () => setIsPlaying(true);
-    const onPause = () => setIsPlaying(false);
+    audio?.addEventListener("pause", onPause);
+    document.addEventListener("visibilitychange", onVisibilityChange);
 
-    audio.addEventListener("play", onPlay);
-    audio.addEventListener("pause", onPause);
+    // Also listen for any user interaction to ensure audio plays (browser autoplay policies)
+    const forcePlay = () => ensurePlaying();
+    const events = ["pointerdown", "pointermove", "touchstart", "click", "scroll", "keydown"] as const;
+    events.forEach((e) => {
+      window.addEventListener(e, forcePlay, { passive: true });
+    });
 
     return () => {
-      audio.removeEventListener("play", onPlay);
-      audio.removeEventListener("pause", onPause);
+      if (retryRef.current) clearInterval(retryRef.current);
+      audio?.removeEventListener("pause", onPause);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      events.forEach((e) => {
+        window.removeEventListener(e, forcePlay);
+      });
     };
-  }, []);
-
-  const toggleMusic = useCallback(() => {
-    const audio = document.getElementById("bg-music") as HTMLAudioElement | null;
-    if (!audio) return;
-
-    if (!audio.paused) {
-      // User explicitly stopped music
-      localStorage.setItem("iqoo_music_muted", "true");
-      audio.pause();
-      setIsPlaying(false);
-    } else {
-      // User unmuted music
-      localStorage.setItem("iqoo_music_muted", "false");
-      audio
-        .play()
-        .then(() => {
-          setIsPlaying(true);
-        })
-        .catch((e) => {
-          console.warn("Audio play error:", e);
-        });
-    }
-  }, []);
+  }, [ensurePlaying]);
 
   return (
     <div className="fixed bottom-5 right-5 sm:bottom-7 sm:right-7 z-50 select-none">
-      <button
-        type="button"
-        onClick={toggleMusic}
-        aria-label={isPlaying ? "Mute Diwali background music" : "Play Diwali background music"}
-        title={isPlaying ? "Click to mute music" : "Click to play music"}
-        className={`relative flex items-center gap-2.5 px-4 py-2.5 rounded-full backdrop-blur-xl border transition-all duration-300 shadow-2xl group cursor-pointer ${
-          isPlaying
-            ? "bg-[#090e24]/90 border-gold/70 text-gold shadow-[0_0_22px_rgba(230,191,90,0.4)]"
-            : "bg-[#090e24]/85 border-white/20 text-white/50 hover:text-white hover:border-gold/50"
-        }`}
+      {/* Music is always on — just show the animated equalizer as a visual indicator */}
+      <div
+        className="relative flex items-center gap-2.5 px-4 py-2.5 rounded-full backdrop-blur-xl border transition-all duration-300 shadow-2xl bg-[#090e24]/90 border-gold/70 text-gold shadow-[0_0_22px_rgba(230,191,90,0.4)]"
+        aria-label="Diwali background music is playing"
+        title="Diwali music is playing"
       >
-        {/* Animated Equalizer Bars with GPU Hardware Acceleration */}
+        {/* Animated Equalizer Bars */}
         <div className="flex items-end gap-[3px] h-4 w-4 justify-center">
           <span
-            className={`w-[2.5px] h-full bg-gold rounded-full music-bar transition-transform ${
-              isPlaying
-                ? "animate-[musicBar_0.65s_ease-in-out_infinite_alternate]"
-                : "scale-y-[0.25]"
-            }`}
+            className="w-[2.5px] h-full bg-gold rounded-full music-bar animate-[musicBar_0.65s_ease-in-out_infinite_alternate]"
           />
           <span
-            className={`w-[2.5px] h-full bg-gold rounded-full music-bar transition-transform ${
-              isPlaying
-                ? "animate-[musicBar_0.5s_ease-in-out_infinite_alternate_0.15s]"
-                : "scale-y-[0.35]"
-            }`}
+            className="w-[2.5px] h-full bg-gold rounded-full music-bar animate-[musicBar_0.5s_ease-in-out_infinite_alternate_0.15s]"
           />
           <span
-            className={`w-[2.5px] h-full bg-gold rounded-full music-bar transition-transform ${
-              isPlaying
-                ? "animate-[musicBar_0.75s_ease-in-out_infinite_alternate_0.3s]"
-                : "scale-y-[0.25]"
-            }`}
+            className="w-[2.5px] h-full bg-gold rounded-full music-bar animate-[musicBar_0.75s_ease-in-out_infinite_alternate_0.3s]"
           />
         </div>
 
         {/* Indicator text */}
         <span className="font-body text-[11px] uppercase tracking-wider font-semibold">
-          {isPlaying ? "Music ON" : "Music OFF"}
+          Music ON
         </span>
 
-        {/* Ambient pulse glow when playing */}
-        {isPlaying && (
-          <span className="absolute -inset-0.5 rounded-full border border-gold/40 animate-ping pointer-events-none" />
-        )}
-      </button>
+        {/* Ambient pulse glow */}
+        <span className="absolute -inset-0.5 rounded-full border border-gold/40 animate-ping pointer-events-none" />
+      </div>
     </div>
   );
 }

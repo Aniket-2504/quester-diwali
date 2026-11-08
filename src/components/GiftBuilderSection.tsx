@@ -15,7 +15,11 @@ if (typeof window !== "undefined") {
 
 const GiftBoxCanvas = dynamic(() => import("./GiftBoxCanvas"), {
   ssr: false,
-  loading: () => null,
+  loading: () => (
+    <div className="w-full h-[260px] sm:h-[320px] md:h-[420px] flex items-center justify-center">
+      <div className="w-28 h-20 sm:w-40 sm:h-28 rounded-xl bg-gradient-to-br from-gold/15 to-royal/10 animate-pulse" />
+    </div>
+  ),
 });
 
 export default function GiftBuilderSection() {
@@ -131,7 +135,7 @@ export default function GiftBuilderSection() {
     <section
       id="gift-box"
       ref={sectionRef}
-      className="relative w-full min-h-screen pt-20 sm:pt-24 md:pt-28 pb-10 sm:pb-16 px-2 sm:px-6 md:px-8 flex flex-col items-center bg-transparent overflow-hidden"
+      className="relative w-full min-h-screen pt-16 sm:pt-24 md:pt-28 pb-8 sm:pb-16 px-2 sm:px-6 md:px-8 flex flex-col items-center bg-transparent overflow-hidden"
     >
       {/* Festive Fireworks Canvas across the Gift Section background */}
       <div className="absolute inset-0 pointer-events-none opacity-60 z-0">
@@ -191,7 +195,7 @@ export default function GiftBuilderSection() {
             selectedSlots={selectedSlots}
             isOpen={isOpen}
             onToggleOpen={() => setIsOpen((v) => !v)}
-            className="w-full h-[210px] sm:h-[280px] md:h-[390px] lg:h-[430px]"
+            className="w-full h-[260px] sm:h-[320px] md:h-[420px] lg:h-[460px]"
           />
         </div>
       </div>

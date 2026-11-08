@@ -83,9 +83,9 @@ function JarModel({ item, isHovered, isSelected }: JarModelProps) {
   });
 
   return (
-    // Center jar vertically around origin (jar height is ~0.7, so y = -0.35 places center at 0)
-    // Tilted forward slightly (0.12 rad) so the top circular mandala lid directly faces the camera!
-    <group ref={outerRef} position={[0, -0.35, 0]} rotation={[0.12, 0, 0]}>
+    // Center jar vertically — jar is ~0.7 tall, position so whole jar + lid + label are visible
+    // Slight forward tilt (0.1 rad) to show the top label
+    <group ref={outerRef} position={[0, -0.25, 0]} rotation={[0.1, 0, 0]}>
       {/* spinRef continuously spins the jar around its vertical cylinder axis */}
       <group ref={spinRef}>
         <primitive object={jarGroup} />
@@ -125,7 +125,7 @@ export default function JarThumbnail({
       onFocus={() => setIsHovered(true)}
       onBlur={() => setIsHovered(false)}
       aria-label={`${item.name}${isSelected ? " (In your box, click to remove)" : ""}`}
-      className={`relative group flex flex-col items-center justify-end transition-all duration-300 w-full max-w-[85px] sm:max-w-[130px] flex-shrink-0 text-center select-none outline-none cursor-pointer pt-6 ${
+      className={`relative group flex flex-col items-center justify-end transition-all duration-300 w-full max-w-[72px] sm:max-w-[130px] flex-shrink-0 text-center select-none outline-none cursor-pointer pt-5 sm:pt-6 ${
         disabled && !isSelected ? "opacity-35 cursor-not-allowed" : "hover:scale-[1.06]"
       }`}
     >
@@ -137,15 +137,15 @@ export default function JarThumbnail({
             : "opacity-0 scale-90 translate-y-2"
         }`}
       >
-        <span className="px-1.5 sm:px-2.5 py-0.5 rounded-full bg-[#f2b31e] text-[#1a1200] font-body text-[9px] sm:text-[10px] font-bold tracking-tight shadow-md whitespace-nowrap">
+        <span className="px-1.5 sm:px-2.5 py-0.5 rounded-full bg-[#f2b31e] text-[#1a1200] font-body text-[8px] sm:text-[10px] font-bold tracking-tight shadow-md whitespace-nowrap">
           In your box
         </span>
         {/* Downward pointer triangle pointing right to jar top lid */}
         <span className="w-0 h-0 border-l-[3px] sm:border-l-[4px] border-l-transparent border-r-[3px] sm:border-r-[4px] border-r-transparent border-t-[4px] sm:border-t-[5px] border-t-[#f2b31e] -mt-[1px]" />
       </div>
 
-      {/* 3D Jar Canvas: Elevated angle + Environment Map for shiny 24K gold and glass (Never cut off) */}
-      <div className="relative w-18 h-18 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 flex items-center justify-center pointer-events-none">
+      {/* 3D Jar Canvas: Wider FOV and pulled-back camera to prevent cropping */}
+      <div className="relative w-16 h-20 sm:w-24 sm:h-28 md:w-28 md:h-32 lg:w-32 lg:h-36 flex items-center justify-center pointer-events-none overflow-visible">
         {/* Gold radiant glow halo behind selected jar */}
         {isSelected && (
           <div
@@ -160,12 +160,12 @@ export default function JarThumbnail({
         {mounted && (
           <Canvas
             frameloop="always"
-            camera={{ position: [0, 1.5, 2.05], fov: 36 }}
+            camera={{ position: [0, 1.2, 2.6], fov: 32 }}
             gl={{ antialias: true, alpha: true, powerPreference: "low-power" }}
             dpr={[1, 1.5]}
             onCreated={({ camera }) => {
-              // Look directly at origin where the center of the jar is placed
-              camera.lookAt(0, -0.05, 0);
+              // Look at the center of the jar (slightly below origin)
+              camera.lookAt(0, 0.05, 0);
             }}
           >
             {/* Required environment map for shiny gold and glass materials */}
@@ -186,7 +186,7 @@ export default function JarThumbnail({
 
       {/* Item Name (Clean font, responsive text, matching Reference Image) */}
       <span
-        className={`font-body text-[10px] sm:text-xs md:text-sm tracking-wide mt-1 sm:mt-1.5 leading-tight line-clamp-2 max-w-[80px] sm:max-w-none transition-colors ${
+        className={`font-body text-[9px] sm:text-xs md:text-sm tracking-wide mt-1 sm:mt-1.5 leading-tight line-clamp-2 max-w-[70px] sm:max-w-none transition-colors ${
           isSelected
             ? "text-gold font-medium drop-shadow-[0_0_8px_rgba(242,179,30,0.5)]"
             : disabled

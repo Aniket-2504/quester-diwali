@@ -118,7 +118,7 @@ export default function ReceiverGiftClient({ gift }: ReceiverGiftClientProps) {
                 isOpen={isOpen}
                 onToggleOpen={() => setIsOpen((v) => !v)}
                 greeting={greeting}
-                className="w-full h-[260px] sm:h-[340px] md:h-[440px] lg:h-[480px]"
+                className="w-full h-[280px] sm:h-[360px] md:h-[440px] lg:h-[480px]"
               />
             </div>
             <span className="text-[11px] font-body text-muted mt-1 tracking-wide">

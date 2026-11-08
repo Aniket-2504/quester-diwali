@@ -10,7 +10,11 @@ if (typeof window !== "undefined") {
 
 const HeroQCanvas = dynamic(() => import("./HeroQCanvas"), {
   ssr: false,
-  loading: () => null,
+  loading: () => (
+    <div className="w-full h-full flex items-center justify-center">
+      <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-gold/20 to-gold/5 animate-pulse" />
+    </div>
+  ),
 });
 
 /*
@@ -43,17 +47,17 @@ export default function Hero() {
 
       {/* Central content */}
       <div className="relative z-10 flex flex-col items-center text-center px-6 pointer-events-none select-none max-w-4xl">
-        {/* 3D Q logo */}
+        {/* 3D Q logo — smaller on mobile for faster render */}
         <div
           id="hero-q-mount"
-          className="w-[280px] h-[280px] sm:w-[340px] sm:h-[340px] md:w-[420px] md:h-[420px] lg:w-[460px] lg:h-[460px] mb-2 pointer-events-auto"
+          className="w-[220px] h-[220px] sm:w-[300px] sm:h-[300px] md:w-[400px] md:h-[400px] lg:w-[460px] lg:h-[460px] mb-2 pointer-events-auto"
           aria-label="3D Q festive logo"
         >
           <HeroQCanvas />
         </div>
 
         {/* Tagline */}
-        <h1 className="font-heading text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold tracking-tight leading-[1.08] text-transparent bg-clip-text bg-gradient-to-r from-[#fff4c9] via-[#e6bf5a] to-[#f7d774] drop-shadow-[0_4px_32px_rgba(230,191,90,0.35)]">
+        <h1 className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-8xl font-semibold tracking-tight leading-[1.08] text-transparent bg-clip-text bg-gradient-to-r from-[#fff4c9] via-[#e6bf5a] to-[#f7d774] drop-shadow-[0_4px_32px_rgba(230,191,90,0.35)]">
           Light the sky.
           <br />
           Gift the glow.

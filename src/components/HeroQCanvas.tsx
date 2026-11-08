@@ -148,7 +148,7 @@ export default function HeroQCanvas() {
           alpha: true,
           powerPreference: "high-performance",
         }}
-        dpr={[1, 2]}
+        dpr={[1, 1.5]}
       >
         <SetupScene />
 

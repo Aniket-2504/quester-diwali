@@ -22,9 +22,10 @@
 import * as THREE from 'three';
 
 const cv = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
-const tex = (c) => { const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; };
+const tex = (c) => { const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; };
 const rnd = (a, b) => a + Math.random() * (b - a);
 const GOLD = new THREE.MeshStandardMaterial({ color: 0xd9a92c, metalness: 1, roughness: 0.22 });
+const IS_MOBILE = typeof window !== 'undefined' && window.innerWidth < 640;
 
 /* ---------- iQOO wordmark, drawn from the logo geometry (logo box 1280 x 300) ---------- */
 export function drawWordmark(c, x, y, s) {
@@ -38,16 +39,20 @@ export function drawWordmark(c, x, y, s) {
 
 /* ---------- textures ---------- */
 function marble() {
-  const c = cv(1024, 512), g = c.getContext('2d'), gr = g.createLinearGradient(0, 0, 1024, 512);
-  gr.addColorStop(0, '#a9c0cf'); gr.addColorStop(.5, '#86a5bb'); gr.addColorStop(1, '#b7c4c9'); g.fillStyle = gr; g.fillRect(0, 0, 1024, 512);
-  for (let i = 0; i < 60; i++) {
-    const x = rnd(0, 1024), y = rnd(0, 512), r = rnd(40, 160), b = g.createRadialGradient(x, y, 0, x, y, r);
+  const size = IS_MOBILE ? 512 : 1024;
+  const sizeH = IS_MOBILE ? 256 : 512;
+  const c = cv(size, sizeH), g = c.getContext('2d'), gr = g.createLinearGradient(0, 0, size, sizeH);
+  gr.addColorStop(0, '#a9c0cf'); gr.addColorStop(.5, '#86a5bb'); gr.addColorStop(1, '#b7c4c9'); g.fillStyle = gr; g.fillRect(0, 0, size, sizeH);
+  const veinCount = IS_MOBILE ? 30 : 60;
+  for (let i = 0; i < veinCount; i++) {
+    const x = rnd(0, size), y = rnd(0, sizeH), r = rnd(40, 160), b = g.createRadialGradient(x, y, 0, x, y, r);
     b.addColorStop(0, Math.random() < .5 ? 'rgba(255,255,255,.16)' : 'rgba(60,95,130,.18)'); b.addColorStop(1, 'rgba(0,0,0,0)');
     g.fillStyle = b; g.fillRect(x - r, y - r, 2 * r, 2 * r);
   }
   g.shadowColor = 'rgba(255,200,60,.8)'; g.shadowBlur = 6;
-  for (let k = 0; k < 16; k++) {
-    let x = rnd(0, 1024), y = rnd(0, 512), a = rnd(0, 6.28);
+  const lineCount = IS_MOBILE ? 8 : 16;
+  for (let k = 0; k < lineCount; k++) {
+    let x = rnd(0, size), y = rnd(0, sizeH), a = rnd(0, 6.28);
     g.beginPath(); g.moveTo(x, y); g.lineWidth = rnd(1, 5); g.strokeStyle = '#dcae3c';
     for (let i = 0; i < 45; i++) { a += rnd(-.9, .9); x += Math.cos(a) * rnd(8, 22); y += Math.sin(a) * rnd(8, 22); g.lineTo(x, y); }
     g.stroke();
@@ -89,10 +94,11 @@ export function makeEnv(renderer) {
   if (renderer && envCache.has(renderer)) {
     return envCache.get(renderer);
   }
+  const sphereSegs = IS_MOBILE ? 16 : 32;
   const s = new THREE.Scene(), c = cv(8, 256), g = c.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, 256);
   gr.addColorStop(0, '#cfd8ff'); gr.addColorStop(.5, '#3a3550'); gr.addColorStop(1, '#15131c'); g.fillStyle = gr; g.fillRect(0, 0, 8, 256);
   const skyTex = new THREE.CanvasTexture(c); skyTex.colorSpace = THREE.SRGBColorSpace;
-  s.add(new THREE.Mesh(new THREE.SphereGeometry(50, 32, 16), new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.BackSide })));
+  s.add(new THREE.Mesh(new THREE.SphereGeometry(50, sphereSegs, sphereSegs / 2), new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.BackSide })));
   const m = new THREE.MeshBasicMaterial({ color: 0xffffff });
   [[0, 20, 0, 30, 1, 10], [-30, 8, 10, 1, 12, 30], [30, 8, -10, 1, 12, 30]].forEach((a) => { const b = new THREE.Mesh(new THREE.BoxGeometry(a[3], a[4], a[5]), m); b.position.set(a[0], a[1], a[2]); s.add(b); });
   const p = new THREE.PMREMGenerator(renderer), t = p.fromScene(s, .04).texture; p.dispose();
@@ -111,7 +117,8 @@ export function createQLogo({ color = 0xf2b31e, depth = 0.5 } = {}) {
   ring.absarc(0, 0, R, 0, Math.PI * 1.5, false); ring.lineTo(0, -r); ring.absarc(0, 0, r, Math.PI * 1.5, 0, true); ring.closePath();
   const L = 1.76, W = 0.5, bar = new THREE.Shape();
   bar.moveTo(-L / 2, -W / 2); bar.lineTo(L / 2, -W / 2); bar.lineTo(L / 2, W / 2); bar.lineTo(-L / 2, W / 2); bar.closePath();
-  const opts = { depth, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 4, curveSegments: 96 };
+  const curveSegs = IS_MOBILE ? 48 : 96;
+  const opts = { depth, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: IS_MOBILE ? 2 : 4, curveSegments: curveSegs };
   const mat = new THREE.MeshPhysicalMaterial({ color, metalness: .35, roughness: .32, clearcoat: .8, clearcoatRoughness: .2 });
   const a = new THREE.Mesh(new THREE.ExtrudeGeometry(ring, opts), mat);
   const b = new THREE.Mesh(new THREE.ExtrudeGeometry(bar, opts), mat);
@@ -131,15 +138,18 @@ export const ITEMS = [
 ];
 export function createJar(it) {
   const j = new THREE.Group();
-  const glass = new THREE.Mesh(new THREE.CylinderGeometry(.36, .36, .55, 40), new THREE.MeshPhysicalMaterial({ color: 0xffffff, transparent: true, opacity: .22, roughness: .05, clearcoat: 1, depthWrite: false }));
+  const segs = IS_MOBILE ? 20 : 40;
+  const lidSegs = IS_MOBILE ? 24 : 48;
+  const fillCount = IS_MOBILE ? 35 : 70;
+  const glass = new THREE.Mesh(new THREE.CylinderGeometry(.36, .36, .55, segs), new THREE.MeshPhysicalMaterial({ color: 0xffffff, transparent: true, opacity: .22, roughness: .05, clearcoat: 1, depthWrite: false }));
   glass.position.y = .275; glass.renderOrder = 2;
-  const base = new THREE.Mesh(new THREE.CylinderGeometry(.3, .3, .4, 32), new THREE.MeshStandardMaterial({ color: new THREE.Color(it.color).multiplyScalar(.6), roughness: .9 }));
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(.3, .3, .4, segs), new THREE.MeshStandardMaterial({ color: new THREE.Color(it.color).multiplyScalar(.6), roughness: .9 }));
   base.position.y = .23;
-  const N = 70, fill = new THREE.InstancedMesh(new THREE.SphereGeometry(.065, 10, 8), new THREE.MeshStandardMaterial({ color: it.color, roughness: .75 }), N), m = new THREE.Matrix4();
-  for (let i = 0; i < N; i++) { const a = rnd(0, 6.28), r = Math.sqrt(Math.random()) * .27; m.makeScale(rnd(.8, 1.3), rnd(.7, 1.1), rnd(.8, 1.3)); m.setPosition(Math.cos(a) * r, rnd(.06, .42), Math.sin(a) * r); fill.setMatrixAt(i, m); }
-  const lid = new THREE.Mesh(new THREE.CylinderGeometry(.385, .385, .14, 48), GOLD); lid.position.y = .62;
-  const ring = new THREE.Mesh(new THREE.CylinderGeometry(.4, .4, .03, 48), GOLD); ring.position.y = .56;
-  const lab = new THREE.Mesh(new THREE.CircleGeometry(.33, 48), new THREE.MeshStandardMaterial({ map: tex(labelArt(it.name)), roughness: .4, metalness: .2 }));
+  const fill = new THREE.InstancedMesh(new THREE.SphereGeometry(.065, IS_MOBILE ? 6 : 10, IS_MOBILE ? 5 : 8), new THREE.MeshStandardMaterial({ color: it.color, roughness: .75 }), fillCount), m = new THREE.Matrix4();
+  for (let i = 0; i < fillCount; i++) { const a = rnd(0, 6.28), r = Math.sqrt(Math.random()) * .27; m.makeScale(rnd(.8, 1.3), rnd(.7, 1.1), rnd(.8, 1.3)); m.setPosition(Math.cos(a) * r, rnd(.06, .42), Math.sin(a) * r); fill.setMatrixAt(i, m); }
+  const lid = new THREE.Mesh(new THREE.CylinderGeometry(.385, .385, .14, lidSegs), GOLD); lid.position.y = .62;
+  const ring = new THREE.Mesh(new THREE.CylinderGeometry(.4, .4, .03, lidSegs), GOLD); ring.position.y = .56;
+  const lab = new THREE.Mesh(new THREE.CircleGeometry(.33, lidSegs), new THREE.MeshStandardMaterial({ map: tex(labelArt(it.name)), roughness: .4, metalness: .2 }));
   lab.rotation.x = -Math.PI / 2; lab.position.y = .692;
   j.add(base, fill, glass, lid, ring, lab); j.userData.item = it; return j;
 }

@@ -77,7 +77,7 @@ export default function RootLayout({
           playsInline
         />
 
-        {/* Immediate zero-delay audio activation script */}
+        {/* Immediate zero-delay audio activation script — music ALWAYS plays */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -86,25 +86,15 @@ export default function RootLayout({
                   var a = document.getElementById('bg-music');
                   if (!a) return;
                   a.volume = 0.45;
-                  
-                  // Check user mute preference
-                  if (localStorage.getItem('iqoo_music_muted') === 'true') {
-                    a.pause();
-                    return;
-                  }
+                  localStorage.removeItem('iqoo_music_muted');
 
                   // Attempt immediate autoplay on HTML parse
                   var p = a.play();
                   if (p && p.catch) {
                     p.catch(function() {
                       // If browser requires gesture, play on the very first micro-gesture
-                      var triggered = false;
                       var start = function() {
-                        if (triggered) return;
-                        if (localStorage.getItem('iqoo_music_muted') !== 'true') {
-                          a.play().catch(function(){});
-                        }
-                        triggered = true;
+                        a.play().catch(function(){});
                         ['pointerdown', 'pointermove', 'touchstart', 'click', 'scroll', 'keydown'].forEach(function(e) {
                           window.removeEventListener(e, start);
                           document.removeEventListener(e, start);

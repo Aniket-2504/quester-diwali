@@ -33,14 +33,18 @@ function SceneSetup({ onEnvReady }: SceneSetupProps) {
   useEffect(() => {
     const aspect = size.width / Math.max(1, size.height);
     const isMobile = size.width < 640;
+    const isSmallMobile = size.width < 400;
 
-    // In portrait / narrow mobile screens, pull camera back so the open lid and wide marble sides never cut off
-    if (aspect < 1.0 || isMobile) {
-      camera.position.set(0, 4.4, 7.2);
-      camera.lookAt(0, 0.9, 0);
+    // In portrait / narrow mobile screens, pull camera way back so the open lid and wide marble sides never cut off
+    if (isSmallMobile) {
+      camera.position.set(0, 5.0, 8.5);
+      camera.lookAt(0, 0.6, 0);
+    } else if (aspect < 1.0 || isMobile) {
+      camera.position.set(0, 4.8, 8.0);
+      camera.lookAt(0, 0.7, 0);
     } else if (aspect < 1.4) {
-      camera.position.set(0, 4.1, 6.4);
-      camera.lookAt(0, 0.8, 0);
+      camera.position.set(0, 4.2, 6.8);
+      camera.lookAt(0, 0.75, 0);
     } else {
       camera.position.set(0, 3.8, 5.8);
       camera.lookAt(0, 0.75, 0);
@@ -209,7 +213,7 @@ export default function GiftBoxCanvas({
   onToggleOpen,
   greeting,
   interactive = true,
-  className = "w-full h-[320px] sm:h-[400px] md:h-[480px]",
+  className = "w-full h-[300px] sm:h-[400px] md:h-[480px]",
 }: GiftBoxCanvasProps) {
   const [reducedMotion, setReducedMotion] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -298,7 +302,7 @@ export default function GiftBoxCanvas({
           alpha: true,
           powerPreference: "high-performance",
         }}
-        dpr={[1, 2]}
+        dpr={[1, 1.5]}
       >
         <SceneSetup />
 

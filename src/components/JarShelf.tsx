@@ -81,10 +81,10 @@ export default function JarShelf({
         </div>
       </div>
 
-      {/* ── 10 Jars Grid: 2 Rows of 5 Jars (Strictly Centered on Large Screens) ── */}
+      {/* ── 10 Jars Grid: 2 Rows of 5 Jars (Mobile-optimized) ── */}
       <div className="w-full max-w-4xl mx-auto flex flex-col items-center">
         {/* Row 1: First 5 Jars */}
-        <div className="w-full grid grid-cols-5 gap-y-6 sm:gap-y-10 gap-x-2 sm:gap-x-6 md:gap-x-8 justify-items-center mb-6 sm:mb-10">
+        <div className="w-full grid grid-cols-5 gap-y-4 sm:gap-y-10 gap-x-1 sm:gap-x-6 md:gap-x-8 justify-items-center mb-4 sm:mb-10">
           {ITEMS.slice(0, 5).map((item: JarItem) => {
             const isSelected = selectedSlots.some((s) => s?.id === item.id);
             return (
@@ -100,7 +100,7 @@ export default function JarShelf({
         </div>
 
         {/* Row 2: Second 5 Jars */}
-        <div className="w-full grid grid-cols-5 gap-y-6 sm:gap-y-10 gap-x-2 sm:gap-x-6 md:gap-x-8 justify-items-center">
+        <div className="w-full grid grid-cols-5 gap-y-4 sm:gap-y-10 gap-x-1 sm:gap-x-6 md:gap-x-8 justify-items-center">
           {ITEMS.slice(5, 10).map((item: JarItem) => {
             const isSelected = selectedSlots.some((s) => s?.id === item.id);
             return (
